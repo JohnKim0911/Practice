@@ -15,13 +15,13 @@ class Introduction:
 - Refer to the available math operators below:\n"""
 
         self.math_operators_dict = {
-            '+': ["Addition", "1 + 2 = 3"],
-            '-': ["Subtraction", "2 - 1 = 1"],
-            '*': ["Multiplication", "2 * 3 = 6"],
-            '/': ["Division", "10 / 3 = 3.333333333"],
-            '**': ["Exponentiation", "2 ** 3 = 8"],
-            '//': ["Floor division", "10 // 3 = 3"],
-            '%': ["Modulus", "10 % 2 = 0, 10 % 3 = 1"],
+            '+': ["Add", "1 + 2 = 3"],
+            '-': ["Subtract", "2 - 1 = 1"],
+            '*': ["Multiply", "2 * 3 = 6"],
+            '/': ["Divide", "10 / 3 = 3.333333333"],
+            '**': ["Square", "2 ** 3 = 8"],
+            '//': ["Get Quotient", "10 // 3 = 3"],
+            '%': ["Get Remainder", "10 % 2 = 0, 10 % 3 = 1"],
         }
 
     def print_math_operators(self):

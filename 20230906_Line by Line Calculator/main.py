@@ -4,12 +4,12 @@
 # [O] Cover weakness of 'eval' function.
 # [O] Show the list of options.
 # [O] Do not show the result as a floating point when it is actually an integer.
-# [X] TODO: Make a Local GUI App
-# [X] TODO: Make a Web App
+
 
 # -------------------------------- Warning ---------------------------------- #
 # Be careful when using "eval":
 # https://stackoverflow.com/questions/9685946/math-operations-from-string
+
 
 # -------------------------------- Code ------------------------------------- #
 from introduction import Introduction

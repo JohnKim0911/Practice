@@ -5,7 +5,7 @@ with open("./Python Cheat Sheet.md") as file:
 
 for text in content_list:
     if '###' in text:
-        print(text.replace('###','').strip())
+        print(text.replace('###', '').strip())
 
 # ------------- Result --------------- #
 # Print
