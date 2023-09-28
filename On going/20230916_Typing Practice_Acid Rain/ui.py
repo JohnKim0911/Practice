@@ -29,8 +29,7 @@ class UserInterface:
         # self.window.iconbitmap(r'C:\Users\Madhusudan\Downloads\favicon(2).ico')  # icon
 
         # Title
-        # self.title_label = Label(text="Acid Rain", fg="white", bg=DARK_BLUE, font=(FONT_STYLE, 18, "bold"))
-        self.title_label = Label(text="Test", fg="white", bg=DARK_BLUE, font=(FONT_FAMILY, 18, "bold"))
+        self.title_label = Label(text="Acid Rain", fg="white", bg=DARK_BLUE, font=(FONT_FAMILY, 18, "bold"))
         self.title_label.grid(column=0, row=0, columnspan=2)
 
         # Light Blue Background Main Box
@@ -203,7 +202,7 @@ class UserInterface:
         rain = Rain(t)
         rain.raw_turtle.hideturtle()
         rain.raw_turtle.penup()
-        random_x = random.randrange(-400, 400)
+        random_x = random.randrange(-350, 370)
         rain.raw_turtle.goto(random_x, 330)
         rain.word = random.choice(self.game.word_string_list)
         # If it's a special number, set the text color to blue.
@@ -234,16 +233,18 @@ class UserInterface:
                 if self.game.ph_level > 0:
                     self.control_ph_level('-')
                 # Remove rain
+                if self.game.special_effect_chosen == "hide":
+                    rain.raw_turtle.hideturtle()
                 rain.raw_turtle.clear()
                 self.game.rain_turtle_list.remove(rain)
 
     def control_ph_level(self, symbol):
         if symbol == '+':
             self.game.control_ph_level('+')
-            new_y = self.ph_level_turtle.ycor() + 9.8
+            new_y = self.ph_level_turtle.ycor() + 25
         else:
             self.game.control_ph_level('-')
-            new_y = self.ph_level_turtle.ycor() - 9.8
+            new_y = self.ph_level_turtle.ycor() - 25
         two_digits_ph_level = round(self.game.ph_level, 2)
         self.ph_level_turtle.clear()
         current_x = self.ph_level_turtle.xcor()
@@ -265,7 +266,7 @@ class UserInterface:
 
     def next_stage(self):
         self.game.rain_num = 0
-        self.game.rain_move_distance += 1  # Make rain moves faster!
+        self.game.rain_move_distance += 0.5  # Make rain moves faster!
         # Pop-up Message
         showinfo(title=f"You've passed stage {self.game.stage}!", message="Press 'OK' to start the next level.")
         # Reset current stage score

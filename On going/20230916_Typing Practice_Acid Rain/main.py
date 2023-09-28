@@ -8,15 +8,19 @@ from ui import UserInterface
 # [X] - Change the icon.
 # [O] Make words move downwards. Make them disappear when they hit the ground.
 # [O] Calculate score and change stage.
-# [X] Keep the highest score, stage and the username.
+# [X] Keep record of score, stage and username.
 # [X] Change the profile image to its pH level.
-# [X] Add some event with blue text.
-# [X] - (Advantage) Disappear all the texts on the screen.
-# [X] - (Disadvantage) Hide all the texts on the screen.
-# [X] - (Advantage) Make the movement of the words slower.
-# [X] - (Disadvantage) Make the movement of the words faster.
+# [O] Add special effect for blue-text.
+# [O] - (Advantage) remove all rain.
+# [O] - (Advantage) Stop rain moving.
+# [O] - (Advantage) Move rain slower.
+# [O] - (Disadvantage) Move rain faster.
+# [O] - (Disadvantage) Hide all rain text.
 
 
 game = GameManager()
 game.get_words_from_the_file()
-ui = UserInterface(game)
+# ui = UserInterface(game)
+
+game.update_record()
+game.get_record()
