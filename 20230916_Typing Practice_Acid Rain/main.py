@@ -5,17 +5,17 @@ from ui import UserInterface
 # ----------------------------------------- Objective ------------------------------------- #
 # [O] Get words from 'words.txt' and make different levels of word lists.
 # [O] Make GUI.
-# [X] - Change the icon.
 # [O] Make words move downwards. Make them disappear when they hit the ground.
 # [O] Calculate score and change stage.
-# [X] Keep the highest score, stage and the username.
-# [X] Change the profile image to its pH level.
-# [X] Add some event with blue text.
-# [X] - (Advantage) Disappear all the texts on the screen.
-# [X] - (Disadvantage) Hide all the texts on the screen.
-# [X] - (Advantage) Make the movement of the words slower.
-# [X] - (Disadvantage) Make the movement of the words faster.
-
+# [O] Keep record of score, stage and username.
+# [O] Change the Emoji image to its pH level.
+# [O] Add special effect for blue-text.
+# [O] - (Advantage) remove all rain.
+# [O] - (Advantage) Stop rain moving.
+# [O] - (Advantage) Move rain slower.
+# [O] - (Disadvantage) Move rain faster.
+# [O] - (Disadvantage) Hide all rain text.
+# [O] Play again button on the game over page
 
 game = GameManager()
 game.get_words_from_the_file()

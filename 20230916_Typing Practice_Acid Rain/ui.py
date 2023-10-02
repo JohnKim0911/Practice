@@ -7,12 +7,12 @@ import random
 from game import GameManager
 from rain import Rain
 
+
 # ----------------------------------------- Constants ------------------------------------- #
 DARK_BLUE = "#213555"
 LIGHT_BLUE = "#4F709C"
 FONT_FAMILY = "Arial"
 RAIN_FONT_STYLE = (FONT_FAMILY, 15, "bold")
-# RAIN_FONT_STYLE = (FONT_FAMILY, 10, "normal")
 
 
 # ----------------------------------------- Class ------------------------------------- #
@@ -39,8 +39,8 @@ class UserInterface:
         # Main Image
         self.bg_canvas = Canvas(width=1000, height=667, highlightthickness=0)
         self.turtle_screen = TurtleScreen(self.bg_canvas)
-        background_img = PhotoImage(file="images/background.png")  # Note: PhotoImage doesn't support '.jpg' format.
-        self.bg_canvas.create_image(0, -1, image=background_img)
+        self.background_img = PhotoImage(file="images/background.png")  # Note: PhotoImage doesn't support '.jpg' format.
+        self.bg_canvas.create_image(0, -1, image=self.background_img)
         self.bg_canvas.grid(column=0, row=1, rowspan=5, padx=(10, 10), pady=(10, 10))
 
         # Entry inside the main image
@@ -48,6 +48,7 @@ class UserInterface:
         self.entry.bind("<Return>", self.enter)
         self.entry.focus()
         self.bg_canvas.create_window(0, 300, window=self.entry)
+        self.button = None  # Will be updated when game is over.
 
         # Side Box
         # Player name with black background
@@ -62,11 +63,19 @@ class UserInterface:
         )
         self.player_canvas.grid(column=1, row=1, padx=(0, 10), pady=(10, 10))
 
-        # Profile Image
-        self.profile_canvas = Canvas(width=140, height=154, highlightthickness=0)
-        profile_img = PhotoImage(file="images/man_face_normal.png")
-        self.profile_canvas.create_image(70, 77, image=profile_img)
-        self.profile_canvas.grid(column=1, row=2, padx=(0, 10))
+        # Emoji Image
+        self.emoji_canvas = Canvas(width=140, height=154, highlightthickness=0)
+        self.emoji_img_list = [
+            "./images/emoji_happy.png",
+            "./images/emoji_normal.png",
+            "./images/emoji_surprised.png",
+            "./images/emoji_crying.png",
+        ]
+        # Thanks to Emoji Images. It was from below:
+        # https://pixabay.com/vectors/emojis-face-expressions-emotions-6058763/
+        emoji_smile = PhotoImage(file=self.emoji_img_list[1])
+        self.emoji_image_container = self.emoji_canvas.create_image(70, 77, image=emoji_smile)
+        self.emoji_canvas.grid(column=1, row=2, padx=(0, 10))
 
         # Dark Blue Background Box
         self.side_canvas = Canvas(width=140, height=450, highlightthickness=0)
@@ -136,35 +145,39 @@ class UserInterface:
 
         self.is_game_on = True
         while self.is_game_on:
-            time.sleep(0.08)  # Control speed of generating each frame: The lower, the faster
-            # time.sleep(0.05)  # Control speed of generating each frame: The lower, the faster
-            # time.sleep(0.01)  # Control speed of generating each frame: The lower, the faster
-            self.turtle_screen.update()
-
-            # Create rain
-            self.game.count_num += 1
-            if self.game.time_to_create_rain():
-                self.game.count_num = 0
-                self.game.rain_num += 1
-                self.create_rain()
-
-            # Control rain
-            self.move_rain()
-            self.remove_rain_when_hitting_ground()
-
-            # "Game over" or "Next stage"
-            if self.game.ph_level <= 0:
-                self.game_over()
-            elif self.game.is_next_stage():  # Next stage when there isn't any rain left.
-                self.next_stage()
-
-            # Reset special effect after certain time if needed.
-            if self.count_timeout and time.time() > self.timeout:
-                self.reset_special_effect()
+            self.play_game()
 
         self.window.mainloop()  # Keep the window open
 
     # ----------------------------------------- Functions ------------------------------------- #
+    def play_game(self):
+        """Main game animation"""
+        time.sleep(self.game.rain_time_sleep_num)  # Control speed of generating each frame: The lower, the faster
+        self.turtle_screen.update()
+
+        # Create rain
+        self.game.count_num += 1
+        if self.game.time_to_create_rain():
+            self.game.count_num = 0
+            self.game.rain_num += 1
+            self.create_rain()
+
+        # Control rain
+        self.move_rain()
+        self.remove_rain_when_hitting_ground()
+
+        # "Game over" or "Next stage"
+        if self.game.ph_level <= 0:
+            self.game_over()
+        elif self.game.is_next_stage():  # Next stage when there isn't any rain left.
+            self.next_stage()
+
+        # Reset special effect after certain time if needed.
+        if self.count_timeout and time.time() > self.timeout:
+            self.reset_special_effect()
+
+        self.control_emoji_image()
+
     def enter(self, event):
         # When entering special word, activate special effect.
         if self.entry.get() == self.game.special_word:
@@ -194,15 +207,20 @@ class UserInterface:
         self.game.rain_turtle_list.remove(rain)
 
     def ask_player_name(self):
-        self.game.player_name = askstring('Name', 'What is your name?').title()
-        self.player_canvas.itemconfig(self.player_text, text=f"{self.game.player_name}")
+        user_input = askstring('Name', 'What is your name?').title()
+        if len(user_input) > 10:
+            showinfo(title="Please Try again.", message="Name should be less than 15 letters.")
+            self.ask_player_name()
+        else:
+            self.game.player_name = user_input
+            self.player_canvas.itemconfig(self.player_text, text=f"{self.game.player_name}")
 
     def create_rain(self):
         t = RawTurtle(self.turtle_screen)
         rain = Rain(t)
         rain.raw_turtle.hideturtle()
         rain.raw_turtle.penup()
-        random_x = random.randrange(-350, 370)
+        random_x = random.randrange(-500, 370)
         rain.raw_turtle.goto(random_x, 330)
         rain.word = random.choice(self.game.word_string_list)
         # If it's a special number, set the text color to blue.
@@ -236,7 +254,10 @@ class UserInterface:
                 if self.game.special_effect_chosen == "hide":
                     rain.raw_turtle.hideturtle()
                 rain.raw_turtle.clear()
-                self.game.rain_turtle_list.remove(rain)
+                try:
+                    self.game.rain_turtle_list.remove(rain)
+                except ValueError:
+                    print(ValueError)
 
     def control_ph_level(self, symbol):
         if symbol == '+':
@@ -251,22 +272,59 @@ class UserInterface:
         self.ph_level_turtle.goto(current_x, new_y)
         self.ph_level_turtle.write(f"◀ pH {two_digits_ph_level}", align="center", font=(FONT_FAMILY, 10, "normal"))
 
+    def change_emoji_image(self, image_file):
+        emoji_img_chosen = PhotoImage(file=image_file)
+        self.emoji_canvas.itemconfig(self.emoji_image_container, image=emoji_img_chosen)
+        self.emoji_canvas.image = emoji_img_chosen
+
+    def control_emoji_image(self):
+        if self.game.ph_level <= 1.5:
+            self.change_emoji_image(self.emoji_img_list[3])  # Crying
+        elif self.game.ph_level <= 3:
+            self.change_emoji_image(self.emoji_img_list[2])  # Surprised
+        elif self.game.ph_level <= 4.5:
+            self.change_emoji_image(self.emoji_img_list[1])  # Normal
+        else:  # self.game.ph_level <= 6.0
+            self.change_emoji_image(self.emoji_img_list[0])  # Happy
+
     def game_over(self):
         # Game over when ph_level reaches 0.
         self.is_game_on = False
-        # Clear the screen: Remove all rain
-        for rain in self.game.rain_turtle_list:
-            rain.raw_turtle.clear()
-        self.game.rain_turtle_list.clear()
-        # Game Over Label
-        game_over_label = Label(text="Game Over", fg="black", font=(FONT_FAMILY, 30, "bold"))
-        game_over_label.grid(column=0, row=1, rowspan=5)
         # Disable Entry
+        self.entry.delete(0, END)
         self.entry.config(state="disabled")
+        # Clear the screen: Remove all rain
+        while len(self.game.rain_turtle_list) != 0:
+            for rain in self.game.rain_turtle_list:
+                # if self.game.special_effect_chosen == "hide":
+                rain.raw_turtle.hideturtle()
+                rain.raw_turtle.clear()
+                self.game.rain_turtle_list.remove(rain)
+        self.game.rain_turtle_list.clear()
+        # Display "Game Over" and "Record" up to 10th
+        self.turtle_screen.clear()
+        self.turtle_screen.bgcolor("black")  # Black background
+        self.turtle_screen.tracer(0)  # Turn off animation of generating text
+        self.display_record_up_to_10th()
+        # Button for "Play Again"
+        self.button = Button(self.bg_canvas.master, text="Play Again", command=self.play_again, font=(FONT_FAMILY, 15, "bold"))
+        self.bg_canvas.create_window(0, 270, window=self.button)
 
     def next_stage(self):
+        # Add score for passing the stage
+        self.game.score_for_whole_game += 100
+        self.score_canvas.itemconfig(self.score_text, text=f"Score: {self.game.score_for_whole_game}")
+        # Reset Special effect
+        self.game.get_random_special_num()
+        self.game.reset_special_effect()
+        self.bottom_status_canvas.itemconfig(self.special_effect_description_text, text="")
+        self.count_timeout = False
+        # Reset for new stage
+        self.entry.delete(0, END)
         self.game.rain_num = 0
-        self.game.rain_move_distance += 0.5  # Make rain moves faster!
+        # Increase difficulty
+        self.game.increase_difficulty()
+
         # Pop-up Message
         showinfo(title=f"You've passed stage {self.game.stage}!", message="Press 'OK' to start the next level.")
         # Reset current stage score
@@ -276,15 +334,9 @@ class UserInterface:
         # Update stage number
         self.game.stage += 1
         self.stage_label.config(text=f"Stage: {self.game.stage}")
-        # Reset Special effect
-        self.game.get_random_special_num()
-        self.game.reset_special_effect()
-        self.bottom_status_canvas.itemconfig(self.special_effect_description_text, text="")
-        self.count_timeout = False
 
     def random_special_effect(self):
         random_num = random.randint(0, 5)
-        print(f"random_num: {random_num}")
         if random_num == 0:
             self.change_rain_speed("slower")
         elif random_num == 1:
@@ -298,9 +350,10 @@ class UserInterface:
 
     def set_time_out(self):
         self.count_timeout = True
-        self.timeout = time.time() + 5
+        self.timeout = time.time() + 5  # Set for 5 seconds
 
     def remove_all_rain_on_the_screen(self):
+        self.game.special_effect_temp_distance = self.game.rain_move_distance
         while len(self.game.rain_turtle_list) != 0:
             for rain in self.game.rain_turtle_list:
                 self.work_for_right_answer(rain)
@@ -318,6 +371,8 @@ class UserInterface:
         self.game.change_rain_speed(option)
 
     def hide_all_rain_text(self):
+        # Refer to "move_rain" for actually hiding text
+        self.game.special_effect_temp_distance = self.game.rain_move_distance
         self.set_time_out()
         self.game.special_effect_chosen = "hide"
         self.bottom_status_canvas.itemconfig(self.special_effect_description_text, text="Hide all")
@@ -327,9 +382,92 @@ class UserInterface:
         self.bottom_status_canvas.itemconfig(self.special_effect_description_text, text="")
         self.game.reset_special_effect()
 
+    def record_turtle(self, content, x_cor, y_cor, font_size, color):
+        record_turtle = RawTurtle(self.turtle_screen)
+        record_turtle.penup()
+        record_turtle.hideturtle()
+        record_turtle.goto(x_cor, y_cor)
+        record_turtle.color(color)
+        record_turtle.write(content, align="center", font=(FONT_FAMILY, font_size, "bold"))
 
+    def display_record_up_to_10th(self):
+        # Game Over text
+        self.record_turtle("Game Over", 0, 250, 30, "white")
+        # Record Up to 10th Text
+        record = self.game.update_record()
+        category_list = ["Rank", "Name", "Score", "Stage"]
+        user_rank = self.game.record.user_index
+        x = -220
+        x_ref = 0
+        # Loop through 4 Columns: display 10 rows each column
+        for category in category_list:
+            y = 150
+            # Display the names of columns
+            self.record_turtle(category, x, y+40, 15, LIGHT_BLUE)
+            rank = 1
+            # Loop through top 10 record Rows
+            for content in record[category]:
+                if rank == user_rank:
+                    # Display current player's record as blue text
+                    self.record_turtle(content, x, y, 15, "white")
+                else:
+                    # Display other players as black text
+                    self.record_turtle(content, x, y, 15, LIGHT_BLUE)
+                rank += 1
+                y += -40
+            # Adjust the gap between columns
+            if x_ref == 0:
+                x += 150
+            else:
+                x += 150
+            x_ref += 1
 
+    def play_again(self):
+        """Reset everything."""
+        self.game.play_again()  # Reset everything on game object.
+        self.ask_player_name()  # Save name and display it on UI
+        # ----------------------------------------- UI ------------------------------------- #
+        # Clear "Game over" page
+        self.turtle_screen.clear()
 
+        # Main Image
+        self.bg_canvas.create_image(0, -1, image=self.background_img)
+        self.bg_canvas.grid(column=0, row=1, rowspan=5, padx=(10, 10), pady=(10, 10))
 
+        # Entry inside the main image
+        self.entry = Entry(self.bg_canvas.master, width=15, font=(FONT_FAMILY, 13, "normal"))
+        self.entry.bind("<Return>", self.enter)
+        self.entry.focus()
+        self.bg_canvas.create_window(0, 300, window=self.entry)
+        self.button = None  # Will be updated when game is over.
 
+        # pH Level Text
+        self.ph_level_turtle.clear()
+        self.ph_level_turtle.goto(35, -20)
+        self.ph_level_turtle.write(f"◀ pH {self.game.ph_level}", align="center", font=(FONT_FAMILY, 10, "normal"))
 
+        # Side Box
+        # Stage
+        self.stage_label.config(text=f"Stage: {self.game.stage}")
+        # Score
+        self.score_canvas.itemconfig(self.score_text, text=f"Score: {self.game.score_for_whole_game}")
+
+        # Bottom Status Box
+        # Special Effect
+        self.bottom_status_canvas.itemconfig(self.special_effect_description_text, text="")
+        # Current score
+        self.bottom_status_canvas.itemconfig(self.current_level_status_text,
+                                             text=f"Current Stage:  {self.game.score_for_current_game} / {self.game.rain_max_num}")
+
+        # ----------------------------------------- Game ------------------------------------- #
+        # For game
+        self.turtle_screen.tracer(0)  # Turn off animation of generating turtles -> Faster and natural
+
+        # For Special effects
+        # Get this random num for the first round. When going to the next stage, it gets another random number.
+        self.game.get_random_special_num()
+        self.count_timeout = False
+
+        self.is_game_on = True
+        while self.is_game_on:
+            self.play_game()
