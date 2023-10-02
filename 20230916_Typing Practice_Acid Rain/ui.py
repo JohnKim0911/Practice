@@ -220,7 +220,7 @@ class UserInterface:
         rain = Rain(t)
         rain.raw_turtle.hideturtle()
         rain.raw_turtle.penup()
-        random_x = random.randrange(-500, 370)
+        random_x = random.randrange(-490, 370)
         rain.raw_turtle.goto(random_x, 330)
         rain.word = random.choice(self.game.word_string_list)
         # If it's a special number, set the text color to blue.

@@ -123,3 +123,5 @@ class GameManager:
         self.stage = 1
 
         self.ph_level = 4.0
+
+        self.record = Record()
