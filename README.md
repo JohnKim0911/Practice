@@ -1,4 +1,3 @@
-# My Own Playground
+# Personal projects in python
 
-My records from simple exercises to personal projects.<br>
-Feel free to look around!
+Click on each folder to see an explanation.
