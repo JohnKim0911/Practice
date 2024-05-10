@@ -1,4 +1,4 @@
-# Personal projects in python
+# Personal Toy Projects in Python
 
 ## Acid Rain (Typing Practice)
 
